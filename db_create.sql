@@ -154,10 +154,10 @@ ALTER TABLE Clients ADD CONSTRAINT Client_Company
     FOREIGN KEY (ClientID)
     REFERENCES Companies (CompanyID);
 
--- Reference: Client_Person (table: Clients)
-ALTER TABLE Clients ADD CONSTRAINT Client_Person
-    FOREIGN KEY (ClientID)
-    REFERENCES Persons (PersonID);
+-- Reference: Client_Person (table: Persons)
+ALTER TABLE Persons ADD CONSTRAINT Client_Person
+    FOREIGN KEY (PersonID)
+    REFERENCES Clients (ClientID);
 
 -- Reference: Day_Conference (table: Days)
 ALTER TABLE Days ADD CONSTRAINT Day_Conference
