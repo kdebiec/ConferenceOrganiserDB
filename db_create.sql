@@ -1,25 +1,27 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2020-01-17 13:08:40.757
+-- Last modification date: 2020-01-18 23:16:58.641
 
 -- tables
 -- Table: Clients
 CREATE TABLE Clients (
-    ClientID int  NOT NULL,
+    ClientID int  NOT NULL IDENTITY,
     IsCompany bit  NOT NULL,
     CONSTRAINT Clients_pk PRIMARY KEY  (ClientID)
 );
 
 -- Table: Companies
 CREATE TABLE Companies (
-    CompanyID int  NOT NULL,
+    CompanyID int  NOT NULL IDENTITY,
+    ClientID int  NOT NULL,
     CompanyName varchar(100)  NOT NULL,
     Email varchar(100)  NOT NULL,
+    Phone varchar(15)  NOT NULL,
     CONSTRAINT company_id PRIMARY KEY  (CompanyID)
 );
 
 -- Table: Conferences
 CREATE TABLE Conferences (
-    ConferenceID int  NOT NULL,
+    ConferenceID int  NOT NULL IDENTITY,
     Title varchar(100)  NOT NULL,
     StartDate date  NOT NULL,
     EndDate date  NOT NULL,
@@ -30,7 +32,7 @@ CREATE TABLE Conferences (
 
 -- Table: DayReservations
 CREATE TABLE DayReservations (
-    DayReservationID int  NOT NULL,
+    DayReservationID int  NOT NULL IDENTITY,
     ReservationID int  NOT NULL,
     DayID int  NOT NULL,
     NumberOfNormalTickets int  NOT NULL,
@@ -50,7 +52,7 @@ CREATE TABLE DayReservationsPersons (
 
 -- Table: Days
 CREATE TABLE Days (
-    DayID int  NOT NULL,
+    DayID int  NOT NULL IDENTITY,
     ConferenceID int  NOT NULL,
     Capacity int  NOT NULL,
     Date date  NOT NULL,
@@ -62,7 +64,7 @@ CREATE TABLE Days (
 
 -- Table: Discounts
 CREATE TABLE Discounts (
-    DiscountID int  NOT NULL,
+    DiscountID int  NOT NULL IDENTITY,
     ConferenceID int  NOT NULL,
     Discount decimal(2,2)  NOT NULL,
     DaysBeforeConference int  NOT NULL,
@@ -73,7 +75,7 @@ CREATE TABLE Discounts (
 
 -- Table: Payments
 CREATE TABLE Payments (
-    PaymentID int  NOT NULL,
+    PaymentID int  NOT NULL IDENTITY,
     ReservationID int  NOT NULL,
     Amount money  NOT NULL,
     DateOfIncome date  NOT NULL,
@@ -82,23 +84,18 @@ CREATE TABLE Payments (
 
 -- Table: Persons
 CREATE TABLE Persons (
-    PersonID int  NOT NULL,
+    PersonID int  NOT NULL IDENTITY,
+    ClientID int  NULL,
     FirstName varchar(50)  NOT NULL,
     LastName varchar(50)  NOT NULL,
     Email varchar(100)  NOT NULL,
-    CONSTRAINT Persons_pk PRIMARY KEY  (PersonID)
-);
-
--- Table: Phones
-CREATE TABLE Phones (
-    OwnerID int  NOT NULL,
     Phone varchar(15)  NOT NULL,
-    CONSTRAINT owner_id PRIMARY KEY  (OwnerID)
+    CONSTRAINT Persons_pk PRIMARY KEY  (PersonID)
 );
 
 -- Table: Places
 CREATE TABLE Places (
-    PlaceID int  NOT NULL,
+    PlaceID int  NOT NULL IDENTITY,
     Street varchar(100)  NOT NULL,
     ZipCode varchar(20)  NOT NULL,
     City varchar(100)  NOT NULL,
@@ -107,7 +104,7 @@ CREATE TABLE Places (
 
 -- Table: Reservations
 CREATE TABLE Reservations (
-    ReservationID int  NOT NULL,
+    ReservationID int  NOT NULL IDENTITY,
     ClientID int  NOT NULL,
     ReservationDate date  NOT NULL,
     IsCancelled bit  NOT NULL,
@@ -133,7 +130,7 @@ CREATE TABLE WorkshopReservationsPersons (
 
 -- Table: Workshops
 CREATE TABLE Workshops (
-    WorkshopID int  NOT NULL,
+    WorkshopID int  NOT NULL IDENTITY,
     PlaceID int  NOT NULL,
     DayID int  NOT NULL,
     Title varchar(100)  NOT NULL,
@@ -149,15 +146,15 @@ CREATE TABLE Workshops (
 );
 
 -- foreign keys
--- Reference: Client_Company (table: Clients)
-ALTER TABLE Clients ADD CONSTRAINT Client_Company
+-- Reference: Companies_Clients (table: Companies)
+ALTER TABLE Companies ADD CONSTRAINT Companies_Clients
     FOREIGN KEY (ClientID)
-    REFERENCES Companies (CompanyID);
-
--- Reference: Client_Person (table: Persons)
-ALTER TABLE Persons ADD CONSTRAINT Client_Person
-    FOREIGN KEY (PersonID)
     REFERENCES Clients (ClientID);
+
+-- Reference: DayReservationsPersons_Persons (table: DayReservationsPersons)
+ALTER TABLE DayReservationsPersons ADD CONSTRAINT DayReservationsPersons_Persons
+    FOREIGN KEY (PersonID)
+    REFERENCES Persons (PersonID);
 
 -- Reference: Day_Conference (table: Days)
 ALTER TABLE Days ADD CONSTRAINT Day_Conference
@@ -184,23 +181,8 @@ ALTER TABLE Payments ADD CONSTRAINT Payments_Reservation
     FOREIGN KEY (ReservationID)
     REFERENCES Reservations (ReservationID);
 
--- Reference: Person_Reservation_Per_Day_Person (table: DayReservationsPersons)
-ALTER TABLE DayReservationsPersons ADD CONSTRAINT Person_Reservation_Per_Day_Person
-    FOREIGN KEY (PersonID)
-    REFERENCES Persons (PersonID);
-
--- Reference: Phone_Company (table: Phones)
-ALTER TABLE Phones ADD CONSTRAINT Phone_Company
-    FOREIGN KEY (OwnerID)
-    REFERENCES Companies (CompanyID);
-
--- Reference: Phone_Person (table: Phones)
-ALTER TABLE Phones ADD CONSTRAINT Phone_Person
-    FOREIGN KEY (OwnerID)
-    REFERENCES Persons (PersonID);
-
--- Reference: Reservation_Client (table: Reservations)
-ALTER TABLE Reservations ADD CONSTRAINT Reservation_Client
+-- Reference: Persons_Clients (table: Persons)
+ALTER TABLE Persons ADD CONSTRAINT Persons_Clients
     FOREIGN KEY (ClientID)
     REFERENCES Clients (ClientID);
 
@@ -208,6 +190,16 @@ ALTER TABLE Reservations ADD CONSTRAINT Reservation_Client
 ALTER TABLE DayReservations ADD CONSTRAINT Reservation_Day
     FOREIGN KEY (DayID)
     REFERENCES Days (DayID);
+
+-- Reference: Reservations_Clients (table: Reservations)
+ALTER TABLE Reservations ADD CONSTRAINT Reservations_Clients
+    FOREIGN KEY (ClientID)
+    REFERENCES Clients (ClientID);
+
+-- Reference: WorkshopReservationsPersons_Persons (table: WorkshopReservationsPersons)
+ALTER TABLE WorkshopReservationsPersons ADD CONSTRAINT WorkshopReservationsPersons_Persons
+    FOREIGN KEY (PersonID)
+    REFERENCES Persons (PersonID);
 
 -- Reference: Workshop_Day (table: Workshops)
 ALTER TABLE Workshops ADD CONSTRAINT Workshop_Day
@@ -218,11 +210,6 @@ ALTER TABLE Workshops ADD CONSTRAINT Workshop_Day
 ALTER TABLE Workshops ADD CONSTRAINT Workshop_Place
     FOREIGN KEY (PlaceID)
     REFERENCES Places (PlaceID);
-
--- Reference: Workshop_Reservation_Persons_Person (table: WorkshopReservationsPersons)
-ALTER TABLE WorkshopReservationsPersons ADD CONSTRAINT Workshop_Reservation_Persons_Person
-    FOREIGN KEY (PersonID)
-    REFERENCES Persons (PersonID);
 
 -- Reference: Workshop_Reservation_Persons_Workshop_Reservation (table: WorkshopReservationsPersons)
 ALTER TABLE WorkshopReservationsPersons ADD CONSTRAINT Workshop_Reservation_Persons_Workshop_Reservation
