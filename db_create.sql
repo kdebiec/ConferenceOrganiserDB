@@ -25,8 +25,7 @@ CREATE TABLE Conferences (
     Title varchar(100)  NOT NULL,
     StartDate date  NOT NULL,
     EndDate date  NOT NULL,
-    StudentDiscount decimal(3,2)  NOT NULL,
-    CONSTRAINT StudentDiscount CHECK (StudentDiscount>=0 and StudentDiscount <= 100),
+    StudentDiscount decimal(3,2)  NOT NULL, CHECK (StudentDiscount>=0 and StudentDiscount <= 100),
     CONSTRAINT Conferences_pk PRIMARY KEY  (ConferenceID)
 );
 
@@ -35,10 +34,8 @@ CREATE TABLE DayReservations (
     DayReservationID int  NOT NULL IDENTITY,
     ReservationID int  NOT NULL,
     DayID int  NOT NULL,
-    NumberOfNormalTickets int  NOT NULL,
-    NumberOfStudentTickets int  NOT NULL,
-    CONSTRAINT NumberOfNormalTickets CHECK (NumberOfNormalTickets>=0),
-    CONSTRAINT NumberOfStudentTickets CHECK (NumberOfStudentTickets>=0),
+    NumberOfNormalTickets int  NOT NULL, CHECK (NumberOfNormalTickets>=0),
+    NumberOfStudentTickets int  NOT NULL, CHECK (NumberOfStudentTickets>=0),
     CONSTRAINT DayReservations_pk PRIMARY KEY  (DayReservationID)
 );
 
@@ -54,11 +51,9 @@ CREATE TABLE DayReservationsPersons (
 CREATE TABLE Days (
     DayID int  NOT NULL IDENTITY,
     ConferenceID int  NOT NULL,
-    Capacity int  NOT NULL,
+    Capacity int  NOT NULL, CHECK (Capacity>0),
     Date date  NOT NULL,
-    Price money  NOT NULL,
-    CONSTRAINT Price CHECK (Price>=0),
-    CONSTRAINT Capacity CHECK (Capacity>0),
+    Price money  NOT NULL, CHECK (Price>=0),
     CONSTRAINT Days_pk PRIMARY KEY  (DayID)
 );
 
@@ -66,10 +61,8 @@ CREATE TABLE Days (
 CREATE TABLE Discounts (
     DiscountID int  NOT NULL IDENTITY,
     ConferenceID int  NOT NULL,
-    Discount decimal(2,2)  NOT NULL,
-    DaysBeforeConference int  NOT NULL,
-    CONSTRAINT Discount CHECK (Discount>=0),
-    CONSTRAINT DaysBeforeConference CHECK (DaysBeforeConference>0),
+    Discount decimal(2,2)  NOT NULL, CHECK (Discount>=0),
+    DaysBeforeConference int  NOT NULL, CHECK (DaysBeforeConference>0),
     CONSTRAINT Discounts_pk PRIMARY KEY  (DiscountID)
 );
 
@@ -115,8 +108,7 @@ CREATE TABLE Reservations (
 CREATE TABLE WorkshopReservations (
     DayReservationID int  NOT NULL,
     WorkshopID int  NOT NULL,
-    NumberOfTickets int  NOT NULL,
-    CONSTRAINT NumberOfTickets CHECK (NumberOfTickets>0),
+    NumberOfTickets int  NOT NULL, CHECK (NumberOfTickets>0),
     CONSTRAINT WorkshopReservations_pk PRIMARY KEY  (DayReservationID,WorkshopID)
 );
 
@@ -135,13 +127,11 @@ CREATE TABLE Workshops (
     DayID int  NOT NULL,
     Title varchar(100)  NOT NULL,
     Description varchar(300)  NOT NULL,
-    Price money  NOT NULL,
-    Capacity int  NOT NULL,
+    Price money  NOT NULL, CHECK (Price>=0),
+    Capacity int  NOT NULL, CHECK (Capacity>0),
     Room varchar(20)  NOT NULL,
     StartTime time  NOT NULL,
     EndTime time  NOT NULL,
-    CONSTRAINT Price CHECK (Price>=0),
-    CONSTRAINT Capacity CHECK (Capacity>0),
     CONSTRAINT Workshops_pk PRIMARY KEY  (WorkshopID)
 );
 
