@@ -36,6 +36,7 @@ CREATE TABLE DayReservations (
     DayID int  NOT NULL,
     NumberOfNormalTickets int  NOT NULL, CHECK (NumberOfNormalTickets>=0),
     NumberOfStudentTickets int  NOT NULL, CHECK (NumberOfStudentTickets>=0),
+    IsCancelled bit  NOT NULL,
     CONSTRAINT DayReservations_pk PRIMARY KEY  (DayReservationID)
 );
 
@@ -109,6 +110,7 @@ CREATE TABLE WorkshopReservations (
     DayReservationID int  NOT NULL,
     WorkshopID int  NOT NULL,
     NumberOfTickets int  NOT NULL, CHECK (NumberOfTickets>0),
+    IsCancelled bit  NOT NULL,
     CONSTRAINT WorkshopReservations_pk PRIMARY KEY  (DayReservationID,WorkshopID)
 );
 
