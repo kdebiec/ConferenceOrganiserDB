@@ -25,7 +25,7 @@ CREATE TABLE Conferences (
     Title varchar(100)  NOT NULL,
     StartDate date  NOT NULL,
     EndDate date  NOT NULL,
-    StudentDiscount decimal(3,2)  NOT NULL, CHECK (StudentDiscount>=0 and StudentDiscount <= 100),
+    StudentDiscount decimal(4,4)  NOT NULL, CHECK (StudentDiscount>=0),
     CONSTRAINT Conferences_pk PRIMARY KEY  (ConferenceID)
 );
 
@@ -62,7 +62,7 @@ CREATE TABLE Days (
 CREATE TABLE Discounts (
     DiscountID int  NOT NULL IDENTITY,
     ConferenceID int  NOT NULL,
-    Discount decimal(2,2)  NOT NULL, CHECK (Discount>=0),
+    Discount decimal(4,4)  NOT NULL, CHECK (Discount>=0),
     DaysBeforeConference int  NOT NULL, CHECK (DaysBeforeConference>0),
     CONSTRAINT Discounts_pk PRIMARY KEY  (DiscountID)
 );
