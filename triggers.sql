@@ -31,8 +31,7 @@ CREATE TRIGGER DayCapacityInsufficiency
                   AND IsCancelled = 0) > (SELECT Capacity FROM inserted))
         BEGIN
             ROLLBACK
-            RAISERROR ('New Capacity is less than current ' +
-                       'participants number, changes aborted', 1, 1)
+            RAISERROR ('New Capacity is less than current participants number, changes aborted', 1, 1)
         END
     END
 
@@ -41,7 +40,7 @@ CREATE TRIGGER WorkshopReservationsCapacityOverflow
     AFTER insert, update
     AS
     BEGIN
-        IF(NumberOfTickets)
+        IF update(NumberOfTickets)
         BEGIN
             DECLARE @WorkshopID int
             SET @WorkshopID = (SELECT WorkshopID FROM inserted)
@@ -71,8 +70,7 @@ CREATE TRIGGER WorkshopsCapacityInsufficiency
               AND IsCancelled = 0) > (SELECT Capacity FROM inserted))
         BEGIN
             ROLLBACK
-            RAISERROR ('New Capacity is less than current ' +
-                       'participants number, changes aborted', 1, 1)
+            RAISERROR ('New Capacity is less than current participants number, changes aborted', 1, 1)
         END
     END
 

@@ -144,11 +144,11 @@ AS
                             FROM Conferences
                             WHERE ConferenceID = @ConferenceID)
 
-        DECLARE @IsAlreadyDayInDB as bit
-        SET @IsAlreadyDayInDB = (EXISTS(SELECT 1
+        DECLARE @IsAlreadyDayInDB as int
+        SET @IsAlreadyDayInDB = (SELECT count(1)
                                         FROM Days
                                         WHERE ConferenceID = @ConferenceID
-                                          AND Date = @Date))
+                                          AND Date = @Date)
 
         IF (@Date >= @ConfStart AND @Date <= @ConfEnd AND @IsAlreadyDayInDB = 0)
         BEGIN
@@ -247,6 +247,11 @@ AS
     BEGIN
         DECLARE @WorkshopCapacity AS int
         DECLARE @ReservedWorkshopSlots AS int
+        DECLARE @DayID AS int
+
+        SET @DayID = (SELECT DayID
+                        FROM DayReservations
+                        WHERE DayReservationID = @DayReservationID)
 
         SET @WorkshopCapacity       = (SELECT Capacity
                                         FROM Days
@@ -286,7 +291,7 @@ AS
             SET @NumberOfBookedPeople = (SELECT COUNT(PersonID)
                                             FROM DayReservationsPersons
                                             WHERE PersonID = @PersonID
-                                              AND NOT IsStudent)
+                                              AND NOT IsStudent = 0)
 
             IF (@NumberOfNormalTickets > @NumberOfBookedPeople)
             BEGIN
@@ -306,7 +311,7 @@ AS
             SET @NumberOfBookedStudents = (SELECT COUNT(PersonID)
                                             FROM DayReservationsPersons
                                             WHERE PersonID = @PersonID
-                                              AND IsStudent)
+                                              AND IsStudent = 1)
 
             IF (@NumberOfStudentTickets > @NumberOfBookedStudents)
             BEGIN
@@ -327,11 +332,11 @@ CREATE PROCEDURE AddPersonToWorkshopReservations
     @WorkshopID int
 AS
     BEGIN
-        DECLARE @IsInDayReservation as bit
-        SET @IsInDayReservation = (EXISTS(SELECT 1
-                                            FROM DayReservationsPersons
-                                            WHERE PersonID = @PersonID
-                                              AND DayReservationID = @DayReservationID))
+        DECLARE @IsInDayReservation as int
+        SET @IsInDayReservation = (SELECT Count(1)
+                                    FROM DayReservationsPersons
+                                    WHERE PersonID = @PersonID
+                                      AND DayReservationID = @DayReservationID)
 
         DECLARE @NumberOfTickets as int
         SET @NumberOfTickets = (SELECT NumberOfTickets
@@ -355,13 +360,13 @@ AS
         SET @StartTime  = (SELECT StartTime FROM Workshops WHERE WorkshopID = @WorkshopID)
         SET @EndTime    = (SELECT EndTime FROM Workshops WHERE WorkshopID = @WorkshopID)
 
-        IF(EXISTS(SELECT * FROM WorkshopReservationsPersons AS wrp
+        IF((SELECT Count(1) FROM WorkshopReservationsPersons AS wrp
                     INNER JOIN Workshops AS ws ON wrp.WorkshopID = ws.WorkshopID
                                           AND ws.DayID = @DayID
                                           AND ((ws.StartTime > @StartTime AND ws.StartTime < @EndTime)
                                               OR (ws.EndTime > @StartTime AND ws.EndTime < @EndTime)
                                               OR (ws.EndTime > @EndTime   AND ws.StartTime < @StartTime))
-                    WHERE PersonID = @PersonID))
+                    WHERE PersonID = @PersonID)>0)
         BEGIN
             RAISERROR ('Participant have colliding workshop', 16, 1)
         END
@@ -373,8 +378,7 @@ AS
         END
         ELSE
         BEGIN
-            RAISERROR ('Number of booked participants is already full ' +
-                       'for this day reservation or person has time collision', 16, 1)
+            RAISERROR ('Number of booked participants is already full for this day reservation or person has time collision', 16, 1)
         END
     END
 
@@ -456,7 +460,8 @@ CREATE PROCEDURE ChangeWorkshopPlace
     @Room varchar(20)
 AS
 BEGIN
-   UPDATE Workshops SET PlaceID = @PlaceId AND Room = @Room WHERE WorkshopID = @WorkshopID
+    UPDATE Workshops SET PlaceID = @PlaceId WHERE WorkshopID = @WorkshopID
+    UPDATE Workshops SET Room = @Room WHERE WorkshopID = @WorkshopID
 END
 
 -- Cancel reservation in general
