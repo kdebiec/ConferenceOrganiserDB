@@ -29,7 +29,7 @@ AS
 
         IF(@PersonID IS NULL)
         BEGIN
-            EXEC addClient 0, @ClientID
+            EXEC addClient 0, @ClientID = @ClientID output
             INSERT INTO Persons (ClientID, FirstName, LastName, Email, Phone)
                 VALUES (@ClientID, @FirstName, @LastName, @Email, @Phone)
             SET @PersonID = @@IDENTITY
@@ -38,7 +38,7 @@ AS
         BEGIN
             IF(@ClientID IS NULL)
             BEGIN
-                EXEC AddClient 0, @ClientID
+                EXEC AddClient 0, @ClientID = @ClientID output
                 UPDATE Persons SET ClientID = @ClientID WHERE PersonID = @PersonID
             END
         END
@@ -78,7 +78,7 @@ AS
         IF(@CompanyID IS NULL)
         BEGIN
             DECLARE @ClientID int
-            EXEC AddClient 1, @ClientID = @ClientID
+            EXEC AddClient 1, @ClientID = @ClientID output
             INSERT INTO Companies (ClientID, CompanyName, Email, Phone)
                 VALUES (@ClientID, @CompanyName, @Email, @Phone)
             SET @CompanyID = @@IDENTITY
